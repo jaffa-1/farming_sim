@@ -23,8 +23,8 @@ public class Player : MonoBehaviour
     Ray interactRay;
     RaycastHit interactHit;
     PlantSite plantsite;
-    Plant plant;
-    Plant equippedPlant;
+    Plant plant = null;
+    Plant equippedPlant = null;
     [SerializeField] Transform spawnTransform;
 
     public static event EventHandler<OnInteractableChangedEventArgs> OnInteractableChanged;
@@ -32,6 +32,7 @@ public class Player : MonoBehaviour
     public class OnInteractableChangedEventArgs : EventArgs
     {
         public PlantSite PlantSite;
+        public Plant plant;
     }
 
     void Start()
@@ -136,16 +137,24 @@ public class Player : MonoBehaviour
             {
                 //looking at plant
                 this.plant = plant;
+                OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
+                {
+                    plant = plant,
+                });
             }
         }
         else
         {
-            this.plantsite = null;
-            this.plant = null;
-            OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
+            if (plant != null || plantsite != null)
             {
-                PlantSite = null,
-            });
+                this.plantsite = null;
+                this.plant = null;
+                OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
+                {
+                    PlantSite = null,
+                    plant = null
+                });
+            }
         }
     }
 
