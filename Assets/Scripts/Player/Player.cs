@@ -22,17 +22,16 @@ public class Player : MonoBehaviour
     float interactDistance = 1.5f;
     Ray interactRay;
     RaycastHit interactHit;
-    PlantSite plantsite;
-    Plant plant = null;
-    Plant equippedPlant = null;
+    
+    ICanInteract Interactable;
+    ICanInteract equippedInteractable;
     [SerializeField] Transform spawnTransform;
 
     public static event EventHandler<OnInteractableChangedEventArgs> OnInteractableChanged;
 
     public class OnInteractableChangedEventArgs : EventArgs
     {
-        public PlantSite PlantSite;
-        public Plant plant;
+        public ICanInteract Interactable;
     }
 
     void Start()
@@ -47,15 +46,10 @@ public class Player : MonoBehaviour
 
     private void GameInput_OnInteract(object sender, System.EventArgs e)
     {
-        if (plantsite != null)
+        if (Interactable != null)
         {
-            plantsite.Interact();
-        }
-        if (plant != null)
-        {
-            equippedPlant = plant;
-            equippedPlant.transform.SetParent(spawnTransform);
-            equippedPlant.transform.localPosition = Vector3.zero;
+            Interactable.Interact();
+            Debug.Log("Interacted with " + Interactable);
         }
     }
     private void FixedUpdate()
@@ -126,33 +120,31 @@ public class Player : MonoBehaviour
             if (interactHit.transform.TryGetComponent(out PlantSite plantSite))
             {
                 // looking at a plant site 
-                this.plantsite = plantSite;
+                Interactable = plantSite;
                 OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
                 {
-                    PlantSite = plantSite,
+                    Interactable = plantSite
                 });
             }
 
             if (interactHit.transform.TryGetComponent(out Plant plant))
             {
                 //looking at plant
-                this.plant = plant;
+                Interactable = plant;
                 OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
                 {
-                    plant = plant,
+                    Interactable = plant
                 });
             }
         }
         else
         {
-            if (plant != null || plantsite != null)
+            if (Interactable != null)
             {
-                this.plantsite = null;
-                this.plant = null;
+                Interactable = null;
                 OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
                 {
-                    PlantSite = null,
-                    plant = null
+                    Interactable = null
                 });
             }
         }

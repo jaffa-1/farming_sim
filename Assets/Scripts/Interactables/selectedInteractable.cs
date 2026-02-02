@@ -1,19 +1,20 @@
 using UnityEngine;
 
-public class SelectedPlantSite : MonoBehaviour
+public class selectedInteractable : MonoBehaviour
 {
-    [SerializeField] PlantSite basePlantSite;
+    ICanInteract baseInteract;
     Outline outline;
 
     private void Start()
     {
+        baseInteract = transform.parent.GetComponent<ICanInteract>();
         Player.OnInteractableChanged += Player_OnInteractableChanged;
         outline = GetComponent<Outline>();
     }
 
     private void Player_OnInteractableChanged(object sender, Player.OnInteractableChangedEventArgs e)
     {
-        if (e.PlantSite == basePlantSite)
+        if (e.Interactable == baseInteract)
         {
             outline.enabled = true;
         }
