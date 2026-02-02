@@ -6,7 +6,7 @@ public class Player : MonoBehaviour
 
     //Movement WASD
     CharacterController characterController;
-    float movementSpeed = 25f;
+    float movementSpeed = 15f;
     bool isGrounded;
     float gravity = -9.8f;
     float jumpHeight = 10;
@@ -24,8 +24,11 @@ public class Player : MonoBehaviour
     RaycastHit interactHit;
     
     ICanInteract Interactable;
-    ICanInteract equippedInteractable;
-    [SerializeField] Transform spawnTransform;
+
+    ICanInteract activeInteractable;
+    Plant equippedPlant;
+    Tools equippedTool;
+    [SerializeField] Transform interactSpawnTransform;
 
     public static event EventHandler<OnInteractableChangedEventArgs> OnInteractableChanged;
 
@@ -44,14 +47,7 @@ public class Player : MonoBehaviour
         GameInput.Instance.OnInteract += GameInput_OnInteract;
     }
 
-    private void GameInput_OnInteract(object sender, System.EventArgs e)
-    {
-        if (Interactable != null)
-        {
-            Interactable.Interact();
-            Debug.Log("Interacted with " + Interactable);
-        }
-    }
+   
     private void FixedUpdate()
     {
         HandleMovement();
@@ -120,36 +116,77 @@ public class Player : MonoBehaviour
             if (interactHit.transform.TryGetComponent(out PlantSite plantSite))
             {
                 // looking at a plant site 
-                Interactable = plantSite;
-                OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
-                {
-                    Interactable = plantSite
-                });
+                SetInteractable(plantSite);
             }
 
             if (interactHit.transform.TryGetComponent(out Plant plant))
             {
                 //looking at plant
-                Interactable = plant;
-                OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
-                {
-                    Interactable = plant
-                });
+                SetInteractable(plant);
             }
         }
         else
         {
             if (Interactable != null)
             {
-                Interactable = null;
-                OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
-                {
-                    Interactable = null
-                });
+                SetInteractable(null);
             }
         }
     }
 
+    void SetInteractable(ICanInteract iCanInteract)
+    {
+        Interactable = iCanInteract;
+        OnInteractableChanged?.Invoke(this, new OnInteractableChangedEventArgs
+        {
+            Interactable = iCanInteract
+        });
+    }
+
+    private void GameInput_OnInteract(object sender, System.EventArgs e)
+    {
+        if (Interactable != null)
+        {
+            Interactable.Interact(this);
+        }
+    }
+
+    public Transform GetInteractSpawn()
+    {
+        return interactSpawnTransform;
+    }
     #endregion
+
+    public void SetEquippedPlant(Plant plant)
+    {
+        equippedPlant = plant;
+    }
+
+    public bool HasEquippedPlant()
+    {
+        if (equippedPlant != null)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public Plant GetEquippedPlant()
+    {
+        return equippedPlant;
+    }
+
+    public void SetEquippedTool(Tools tool)
+    {
+        equippedTool = tool;
+    }
+    public bool HasEquippedTool()
+    {
+        if (equippedTool != null)
+        {
+            return true;
+        }
+        return false;
+    }
 
 }

@@ -13,7 +13,7 @@ public class GameInput : MonoBehaviour
     public event EventHandler OnInteract;
 
     //camera
-    float mouseSensitivity = 35;
+    float mouseSensitivity = 25;
 
     private void Awake()
     {
