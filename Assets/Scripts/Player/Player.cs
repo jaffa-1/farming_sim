@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Player : MonoBehaviour
 {
@@ -25,7 +26,6 @@ public class Player : MonoBehaviour
     
     ICanInteract Interactable;
 
-    ICanInteract activeInteractable;
     Plant equippedPlant;
     Tools equippedTool;
     [SerializeField] Transform interactSpawnTransform;
@@ -37,6 +37,31 @@ public class Player : MonoBehaviour
         public ICanInteract Interactable;
     }
 
+    [Serializable]
+    class plantItem
+    {
+        public PlantSO plantSO;
+        public int itemCount;
+
+        public plantItem(PlantSO newplant,int count)
+        {
+            plantSO = newplant;
+            itemCount = count;
+        }
+        public void IncreaseCount()
+        {
+            itemCount++;
+        }
+    }
+
+    [SerializeField]
+    List<plantItem> plantItemlist;
+
+    private void Awake()
+    {
+        plantItemlist = new List<plantItem>();
+    }
+
     void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -45,9 +70,14 @@ public class Player : MonoBehaviour
 
         GameInput.Instance.OnJump += GameInput_OnJump;
         GameInput.Instance.OnInteract += GameInput_OnInteract;
+        GameInput.Instance.OnPlantEquipped += GameInput_OnPlantEquipped;
     }
 
-   
+    private void GameInput_OnPlantEquipped(object sender, EventArgs e)
+    {
+        
+    }
+
     private void FixedUpdate()
     {
         HandleMovement();
@@ -128,6 +158,10 @@ public class Player : MonoBehaviour
             {
                 SetInteractable(tools);
             }
+            if (interactHit.transform.TryGetComponent(out SeedStorage seedStorage))
+            {
+                SetInteractable(seedStorage);
+            }
         }
         else
         {
@@ -160,6 +194,24 @@ public class Player : MonoBehaviour
         return interactSpawnTransform;
     }
     #endregion
+    public bool UpdatePlantInventory(PlantSO plantSO)
+    {
+        for (int i = 0; i < plantItemlist.Count; i++)
+        {
+            if (plantItemlist[i].plantSO == plantSO)
+            {
+                //player has plant
+                plantItemlist[i].IncreaseCount();
+                Debug.Log(plantItemlist[i].itemCount);
+                return true;
+            }
+        }
+        //player does not have item 
+        plantItem plantitem =new(plantSO,1);
+        plantItemlist.Add(plantitem);
+        return false;
+
+    }
 
     public void SetEquippedPlant(Plant plant)
     {
