@@ -25,6 +25,7 @@ public class Player : MonoBehaviour
     RaycastHit interactHit;
     
     ICanInteract Interactable;
+    static ICanInteract equippedInteractable;
 
     static Plant equippedPlant;
     static Tools equippedTool;
@@ -173,7 +174,7 @@ public class Player : MonoBehaviour
     
     
 
-    public bool HasEquippedPlant()
+    public static bool HasEquippedPlant()
     {
         if (equippedPlant != null)
         {
@@ -190,11 +191,18 @@ public class Player : MonoBehaviour
     public static void SetEquippedPlant(Plant plant)
     {
         equippedPlant = plant;
+        equippedInteractable = equippedPlant;
     }
 
-    public void SetEquippedTool(Tools tool)
+    public static void SetEquippedTool(Tools tool)
     {
         equippedTool = tool;
+        equippedInteractable = equippedTool;
+    }
+
+    public static ICanInteract GetEquippedInteractable()
+    {
+        return equippedInteractable;
     }
     public bool HasEquippedTool()
     {

@@ -27,15 +27,13 @@ public class PlantSite : MonoBehaviour, ICanInteract
 
     private void Update()
     {
-        if (activePlant != null)
+        if (activePlant != null && plantIsGrowing)
         {
             switch (currentGrowthLevel)
             {
                 case GrowthLevel.seed:
                     {
                         //plant is a seed
-                        if (plantIsGrowing)
-                        {
                             activePlant.gameObject.SetActive(false);
                             //plant is watered
                             seed_halfDevelopedTimer += Time.deltaTime;
@@ -44,7 +42,6 @@ public class PlantSite : MonoBehaviour, ICanInteract
                                 currentGrowthLevel = GrowthLevel.halfDeveloped;
                                 halfDevelopedGameobject = Instantiate(activePlant.GetPlantSO().halfDevelopedVisual, spawnTransform);
                             }
-                        }
                     }
                     break;
                 case GrowthLevel.halfDeveloped:
@@ -67,10 +64,12 @@ public class PlantSite : MonoBehaviour, ICanInteract
 
     public void Interact(Player player)
     {
-        if (player.HasEquippedPlant() && activePlant == null)
+        if (Player.HasEquippedPlant() && activePlant == null)
         {
             //player is carrying a plant and this site is empty
+            player.inventory.RemovePlantInList(player.GetEquippedPlant());
             SetPlant(player.GetEquippedPlant());
+            Player.SetEquippedPlant(null);
         }
         if (player.HasEquippedTool() && activePlant != null)
         {

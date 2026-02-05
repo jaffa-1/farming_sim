@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Tools : MonoBehaviour, ICanInteract
@@ -10,9 +11,17 @@ public class Tools : MonoBehaviour, ICanInteract
     [SerializeField] toolType thistoolType;
     public void Interact(Player player)
     {
-        //pickup watering can
-        setParent(player.GetInteractSpawn());
-        player.SetEquippedTool(this);
+        if (player.inventory.CheckToolInInventory(this, out int itemIndex))
+        {
+            //player has this tool in his inventory
+            Debug.Log("player aldready has tool");
+            
+        }
+        else
+        {
+            setParent(player.GetInteractSpawn());
+            player.inventory.EquipNewTool(this);
+        }
     }
 
     public void setParent(Transform transform)
@@ -28,5 +37,10 @@ public class Tools : MonoBehaviour, ICanInteract
             return true;
         }
         return false;
+    }
+
+    private void DestroySelf()
+    {
+        Destroy(gameObject);
     }
 }

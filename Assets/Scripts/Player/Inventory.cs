@@ -23,12 +23,29 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    [Serializable]
+    class toolItem
+    {
+        public Tools tool;
+        public float itemDurability;
+
+        public toolItem(Tools newTool, float durability)
+        {
+            tool = newTool;
+            itemDurability = durability;
+        }
+        
+    }
+
     [SerializeField]
     List<plantItem> plantItemlist;
+    [SerializeField]
+    List<toolItem> toolItemList;
 
     private void Awake()
     {
         plantItemlist = new List<plantItem>();
+        toolItemList = new List<toolItem>();
     }
 
     private void Start()
@@ -41,7 +58,8 @@ public class Inventory : MonoBehaviour
     {
         if (plantItemlist.Count >= 1)
         {
-            toggleEqupipedPlant(plantItemlist[0].plant);
+            Player.SetEquippedPlant(plantItemlist[0].plant);
+            toggleEqupipedItem(plantItemlist[0].plant);
         }
     }
 
@@ -49,7 +67,8 @@ public class Inventory : MonoBehaviour
     {
         if (plantItemlist.Count >= 2)
         {
-            toggleEqupipedPlant(plantItemlist[1].plant);
+            Player.SetEquippedPlant(plantItemlist[1].plant);
+            toggleEqupipedItem(plantItemlist[1].plant);
         }
     }
     public void AddPlantInList(Plant plant)
@@ -63,6 +82,31 @@ public class Inventory : MonoBehaviour
         {
             plantItem plantitem = new(plant, 1);
             plantItemlist.Add(plantitem);
+        }
+    }
+    public void RemovePlantInList(Plant plant)
+    {
+        if (CheckPlantInInventory(plant.GetPlantSO(), out int itemIndex))
+        {
+            //player has this plant item in inventory
+            plantItemlist.RemoveAt(itemIndex);
+        }
+        else
+        {
+            Debug.LogError("plant is not in list");
+        }
+    }
+    public void AddToolInList(Tools tool)
+    {
+        if (CheckToolInInventory(tool, out int itemIndex))
+        {
+            //player has this plant item in inventory
+            plantItemlist[itemIndex].IncreaseCount();
+        }
+        else
+        {
+            toolItem toolitem = new(tool, 1);
+            toolItemList.Add(toolitem);
         }
     }
 
@@ -89,6 +133,20 @@ public class Inventory : MonoBehaviour
         itemIndex = 0;
         return false;
     }
+    public bool CheckToolInInventory(Tools tool, out int itemIndex)
+    {
+        for (int i = 0; i < toolItemList.Count; i++)
+        {
+            //cycle through inventory
+            if (toolItemList[i].tool == tool)
+            {
+                itemIndex = i;
+                return true;
+            }
+        }
+        itemIndex = 0;
+        return false;
+    }
     public bool playerHasSeeds()
     {
         if (plantItemlist.Count > 0)
@@ -105,26 +163,60 @@ public class Inventory : MonoBehaviour
 
     public void EquipNewPlant(Plant plant)
     {
-        toggleEqupipedPlant(plant);
+        Player.SetEquippedPlant(plant);
+        toggleEqupipedItem(plant);
 
         //if not present add in list
         AddPlantInList(plant);
     }
 
-    public void toggleEqupipedPlant(Plant plant)
+    public void EquipNewTool(Tools tool)
     {
-        Player.SetEquippedPlant(plant); 
+        Player.SetEquippedTool(tool);
+        toggleEqupipedItem(tool);
 
-        foreach (Transform child in plant.transform.parent)
+        //if not present add in list
+        AddToolInList(tool);
+    }
+
+    public void toggleEqupipedItem(ICanInteract iCanInteract)
+    {
+        if (Player.GetEquippedInteractable() is Plant)
         {
-            if (child.GetComponent<Plant>() == plant)
+            Plant plant = iCanInteract as Plant;
+            //player has equipped plant
+
+            foreach (Transform child in plant.transform.parent)
             {
-                child.gameObject.SetActive(true);
-            }
-            else
-            {
-                child.gameObject.SetActive(false);
+                if (child.GetComponent<Plant>() == plant)
+                {
+                    child.gameObject.SetActive(true);
+                }
+                else
+                {
+                    child.gameObject.SetActive(false);
+                }
             }
         }
+        if (Player.GetEquippedInteractable() is Tools)
+        {
+            Tools tool = iCanInteract as Tools;
+            //player has equipped plant
+            Player.SetEquippedTool(tool);
+
+            foreach (Transform child in tool.transform.parent)
+            {
+                if (child.GetComponent<Tools>() == tool)
+                {
+                    child.gameObject.SetActive(true);
+                }
+                else
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+        }
+
+
     }
 }
