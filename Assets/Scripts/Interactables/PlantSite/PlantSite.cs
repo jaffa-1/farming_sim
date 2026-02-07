@@ -84,18 +84,19 @@ public class PlantSite : MonoBehaviour, ICanInteract, IHasProgress
         if (Player.GetEquippedInteractable() is Plant && activePlant == null)
         {
             //player is carrying a plant and this site is empty
-            player.inventory.RemovePlantInList(player.GetEquippedPlant());
-
             if (player.inventory.GetPlantItemCount(player.GetEquippedPlant()) > 1)
             {
                 //player has multiple seeds 
                 GameObject plantGO = Instantiate(player.GetEquippedPlant().GetPlantSO().plantPrefab, spawnTransform);
                 SetPlant(plantGO.GetComponent<Plant>());
+                player.inventory.RemovePlantInList(player.GetEquippedPlant());
             }
             else
             {
                 //player has one seed
+
                 SetPlant(player.GetEquippedPlant());
+                player.inventory.RemovePlantInList(player.GetEquippedPlant());
                 Player.SetEquippedPlant(null);
             }
 
